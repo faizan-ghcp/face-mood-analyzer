@@ -1,0 +1,90 @@
+{
+  "preAnalysisQuestions": [
+    {
+      "id": 1,
+      "question": "If you had to put your mood into a color today, what would it be?",
+      "options": [
+        "Bright yellow – energetic and happy",
+        "Blue – calm or reflective",
+        "Red – frustrated or angry",
+        "Gray – neutral or tired",
+        "Purple – thoughtful or creative",
+        "Other / unsure"
+      ],
+      "colors": [
+        "#FFEB3B",
+        "#2196F3",
+        "#F44336",
+        "#9E9E9E",
+        "#9C27B0",
+        "#FFFFFF"
+      ]
+    },
+    {
+      "id": 2,
+      "question": "Which statement resonates most with your feelings right now?",
+      "options": [
+        "I feel in control of my emotions.",
+        "I’m struggling to understand how I feel.",
+        "I’m experiencing strong highs and lows.",
+        "I feel mostly calm and steady."
+      ],
+        "colors": [
+            "#4CAF50",
+            "#FF9800",
+            "#E91E63",
+            "#03A9F4"
+        ]
+    },
+    {
+      "id": 3,
+      "question": "When something stressful happens, how do you usually respond?",
+      "options": [
+        "I take a step back and reflect",
+        "I feel overwhelmed and react immediately",
+        "I try to distract myself or stay busy",
+        "I seek support from someone I trust"
+      ],
+        "colors": [
+            "#8BC34A",
+            "#FF5722",
+            "#FFC107",
+            "#00BCD4"
+        ]
+    },
+    {
+      "id": 4,
+      "question": "Which of these best describes your emotional energy today?",
+      "options": [
+        "I feel lively and motivated",
+        "I feel balanced and steady",
+        "I feel drained or low",
+        "I feel restless or anxious"
+      ],
+        "colors": [
+            "#FF9800",
+            "#4CAF50",
+            "#9E9E9E",
+            "#F44336"
+        ]
+    },
+    {
+      "id": 5,
+      "question": "If you could give yourself a small piece of advice for today, what would it be?",
+      "options": [
+        "Be gentle with yourself",
+        "Focus on small achievements",
+        "Take a break and breathe",
+        "Push through and stay productive",
+        "Other / unsure"
+      ],
+        "colors": [
+            "#E1BEE7",
+            "#AED581",
+            "#81D4FA",
+            "#FFCC80",
+            "#FFFFFF"
+        ]
+    }
+  ]
+}

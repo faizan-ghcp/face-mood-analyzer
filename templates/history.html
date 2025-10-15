@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Mood History — Face Mood Analyzer</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Mood History</h1>
+    <div class="top-links">
+      <a href="/">← Back to Scanner</a>
+    </div>
+
+    <div id="summary">
+      <canvas id="timelineChart" width="900" height="300"></canvas>
+    </div>
+
+    <h3>Recent Entries</h3>
+      <div style="margin-bottom:10px;">
+        <label for="nameFilter">Filter by Name:</label>
+        <select id="nameFilter"><option value="">All</option></select>
+      </div>
+    <table id="historyTable">
+      <thead>
+  <tr><th>When (UTC)</th><th>Dominant</th><th>Intensity</th><th>Name</th><th>Action</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchHistory() {
+      const res = await fetch('/api/history?limit=200');
+      const data = await res.json();
+      return data.history || [];
+    }
+      function getUniqueNames(entries) {
+        const names = new Set();
+        entries.forEach(e => { if (e.name) names.add(e.name); });
+        return Array.from(names);
+      }
+
+    function populateTable(entries) {
+      const tbody = document.querySelector("#historyTable tbody");
+      tbody.innerHTML = "";
+      entries.forEach(e => {
+        const tr = document.createElement('tr');
+        const ts = new Date(e.timestamp).toLocaleString();
+        tr.innerHTML = `<td>${ts}</td><td>${e.dominant}</td><td>${e.intensity.toFixed(1)}%</td><td>${e.name ? e.name : ''}</td><td><button class='deleteBtn' data-id='${e.id}'>Delete</button></td>`;
+        tbody.appendChild(tr);
+      });
+      // Add delete button listeners
+      tbody.querySelectorAll('.deleteBtn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+          const id = this.getAttribute('data-id');
+          if (!confirm('Delete this entry?')) return;
+          const res = await fetch('/api/delete_entry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          const data = await res.json();
+          if (data.status === 'ok') {
+            location.reload();
+          } else {
+            alert(data.error || 'Delete failed');
+          }
+        });
+      });
+    }
+      (async () => {
+        const entries = await fetchHistory();
+        // Populate name filter dropdown
+        const nameFilter = document.getElementById('nameFilter');
+        const uniqueNames = getUniqueNames(entries);
+        uniqueNames.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          nameFilter.appendChild(opt);
+        });
+
+        function filterAndShow() {
+          const selected = nameFilter.value;
+          let filteredEntries;
+          if (selected === "" || selected === null) {
+            filteredEntries = entries;
+          } else {
+            filteredEntries = entries.filter(e => e.name === selected);
+          }
+          populateTable(filteredEntries);
+          drawTimeline(filteredEntries);
+        }
+        nameFilter.addEventListener('change', filterAndShow);
+        filterAndShow();
+        // drawTimeline(entries);
+      })();
+
+    let timelineChartObj = null;
+    function drawTimeline(entries) {
+      const recent = entries.slice(0, 50).reverse(); // oldest -> newest
+      const ctx = document.getElementById('timelineChart').getContext('2d');
+      if (!recent.length) {
+        if (timelineChartObj) {
+          timelineChartObj.destroy();
+          timelineChartObj = null;
+        }
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        return;
+      }
+      const labels = recent.map(e => new Date(e.timestamp).toLocaleString());
+      const emotions = Object.keys(recent[0].emotions || {});
+      const datasets = emotions.map(em => ({
+        label: em,
+        data: recent.map(r => r.emotions[em] || 0),
+        fill: false,
+        tension: 0.2
+      }));
+      if (timelineChartObj) timelineChartObj.destroy();
+      timelineChartObj = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true, max: 100 } }
+        }
+      });
+    }
+
+    (async () => {
+      const entries = await fetchHistory();
+      populateTable(entries);
+      drawTimeline(entries);
+    })();
+  </script>
+</body>
+</html>

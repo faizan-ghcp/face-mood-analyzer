@@ -1,0 +1,77 @@
+
+:root {
+	--bg: #f8f9fa;
+	--fg: #222;
+	--accent: #4f8cff;
+	--border: #ddd;
+	--card: #fff;
+	--button-bg: #4f8cff;
+	--button-fg: #fff;
+	--table-odd: #fafafa;
+}
+
+body { font-family: Arial, sans-serif; display:flex; justify-content:center; padding:20px; background: var(--bg); color: var(--fg); }
+.container { width: 720px; background: var(--card); border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 24px 32px; }
+video { border: 1px solid var(--border); max-width:100%; }
+button { margin-top:10px; padding:8px 12px; background: var(--button-bg); color: var(--button-fg); border: none; border-radius: 4px; cursor: pointer; }
+button:hover { filter: brightness(0.95); }
+#result { margin-top:20px; }
+.top-links { margin-bottom: 10px; }
+.palette-bar { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.save-options { margin-top: 8px; display:flex; gap:8px; align-items:center; }
+.save-options input[type="text"], #nameInput { flex:1; padding:6px; }
+#historyTable { width:100%; border-collapse: collapse; margin-top:12px; }
+#historyTable th, #historyTable td { border:1px solid var(--border); padding:8px; text-align:left; }
+#historyTable tbody tr:nth-child(odd){ background:var(--table-odd); }
+
+/* Palettes */
+.theme-default {
+	--bg: #f8f9fa;
+	--fg: #222;
+	--accent: #4f8cff;
+	--border: #ddd;
+	--card: #fff;
+	--button-bg: #4f8cff;
+	--button-fg: #fff;
+	--table-odd: #fafafa;
+}
+.theme-sunset {
+	--bg: #fff6f0;
+	--fg: #3a1c1c;
+	--accent: #ff7e5f;
+	--border: #ffb199;
+	--card: #fff0e6;
+	--button-bg: #ff7e5f;
+	--button-fg: #fff;
+	--table-odd: #ffe0d2;
+}
+.theme-mint {
+	--bg: #e6fff7;
+	--fg: #1c3a2b;
+	--accent: #2ec4b6;
+	--border: #a0e6d2;
+	--card: #f0fffa;
+	--button-bg: #2ec4b6;
+	--button-fg: #fff;
+	--table-odd: #d2fff0;
+}
+.theme-ocean {
+	--bg: #eaf6fb;
+	--fg: #1b2a41;
+	--accent: #0077b6;
+	--border: #90caf9;
+	--card: #f0faff;
+	--button-bg: #0077b6;
+	--button-fg: #fff;
+	--table-odd: #d0eaff;
+}
+.theme-pastel {
+	--bg: #f7f0ff;
+	--fg: #3a2c4c;
+	--accent: #b388ff;
+	--border: #e0c3fc;
+	--card: #f9f6ff;
+	--button-bg: #b388ff;
+	--button-fg: #fff;
+	--table-odd: #ede7f6;
+}
