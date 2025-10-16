@@ -25,7 +25,3 @@ def save_response(question_id: int, question_text: str, selected_option: str, na
               (question_id, question_text, selected_option, name))
     conn.commit()
     conn.close()
-
-
-
-# make signup/login system, save initial response with user id, make user menu, history of results, music therapy/ chatbot

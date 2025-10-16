@@ -1,15 +1,137 @@
 
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from server.analysis import analyze_image
 from server.suggestions import generate_tips
 from server import journaling
+from server.journaling import get_db_connection
+from server import auth
+from server import admin
 import config
+import jwt
+import datetime
+from functools import wraps
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+app.config['SECRET_KEY'] = getattr(config, 'SECRET_KEY', 'your-very-secret-key')
+
+from werkzeug.security import check_password_hash
+# Initialize DB on startup
+journaling.init_db()
+auth.init_db()
+admin.init_admin_db()
+
+def admin_token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get('admin_token')
+        if not token:
+            return redirect(url_for('admin_login'))
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            if not data.get('is_admin'):
+                return redirect(url_for('admin_login'))
+        except Exception:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if admin.verify_admin(username, password):
+            token = jwt.encode({
+                'username': username,
+                'is_admin': True,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+            }, app.config['SECRET_KEY'], algorithm="HS256")
+            resp = redirect(url_for('admin_dashboard'))
+            resp.set_cookie('admin_token', token, httponly=True, samesite='Lax')
+            return resp
+        return render_template('admin_login.html', error="Invalid credentials")
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
+@admin_token_required
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+@app.route('/logout_admin')
+def logout_admin():
+    resp = redirect(url_for('admin_login'))
+
+# Admin mood history page
+@app.route('/admin/history')
+@admin_token_required
+def admin_history():
+    return render_template('admin_history.html')
+
+# Admin mood history data API
+@app.route('/admin/mood_history')
+@admin_token_required
+def admin_mood_history_data():
+    # Show all users' mood history
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT id, username, mood, date FROM mood_history ORDER BY date DESC')
+    rows = [dict(row) for row in cur.fetchall()]
+    conn.close()
+    return jsonify(rows)
+
+# Admin delete mood entry
+@app.route('/admin/delete_mood/<int:id>', methods=['DELETE'])
+@admin_token_required
+def admin_delete_mood(id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM mood_history WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return '', 204
+    resp.set_cookie('admin_token', '', expires=0)
+    return resp
 
 # Initialize DB on startup
 journaling.init_db()
+auth.init_db()
+
+
+@app.route("/login")
+def login_page():
+    return render_template("login.html")
+
+@app.route("/signup")
+def signup_page():
+    return render_template("signup.html")
+
+
+@app.route("/api/signup", methods=["POST"])
+def api_signup():
+    payload = request.get_json()
+    username = payload.get("username")
+    password = payload.get("password")
+    if not username or not password:
+        return jsonify({"error": "Missing username or password"}), 400
+    success = auth.signup(username, password)
+    if success:
+        return jsonify({"success": True})
+    else:
+        return jsonify({"error": "Username already exists"}), 400
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    payload = request.get_json()
+    username = payload.get("username")
+    password = payload.get("password")
+    if not username or not password:
+        return jsonify({"error": "Missing username or password"}), 400
+    token = auth.login(username, password)
+    if token:
+        return jsonify({"token": token})
+    else:
+        return jsonify({"error": "Invalid credentials"}), 401
 
 
 @app.route("/")

@@ -8,6 +8,7 @@
 </head>
 <body>
   <div class="container">
+    <button id="logoutBtn" style="float:right;">Logout</button>
     <h1>Mood History</h1>
     <div class="top-links">
       <a href="/">← Back to Scanner</a>
@@ -31,6 +32,10 @@
   </div>
 
   <script>
+    document.getElementById('logoutBtn').onclick = function() {
+      localStorage.removeItem('jwt');
+      window.location.href = '/login';
+    };
     async function fetchHistory() {
       const res = await fetch('/api/history?limit=200');
       const data = await res.json();

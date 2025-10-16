@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Mood History</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Admin: Mood History</h2>
+        <button id="logoutBtn">Logout</button>
+        <table id="moodTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Mood</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Mood data will be inserted here -->
+            </tbody>
+        </table>
+        <canvas id="moodChart" width="400" height="200"></canvas>
+    </div>
+    <script src="/static/js/admin_history.js"></script>
+</body>
+</html>

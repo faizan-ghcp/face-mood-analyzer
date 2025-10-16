@@ -1,3 +1,5 @@
+def get_db_connection():
+    return sqlite3.connect(DB_PATH)
 def delete_entry(entry_id: int) -> bool:
     conn = sqlite3.connect(DB_PATH)
     try:

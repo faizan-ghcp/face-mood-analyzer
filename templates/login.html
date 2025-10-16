@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="container" style="max-width:400px;margin:auto;">
+  <h2>Login</h2>
+  <div style="margin-bottom:12px;"><a href="/history">View Mood History</a></div>
+    <form id="loginForm">
+      <input type="text" id="loginUsername" placeholder="Username" required /><br>
+      <input type="password" id="loginPassword" placeholder="Password" required /><br>
+      <button type="submit">Login</button>
+    </form>
+    <div id="authMsg" style="color:red;margin-top:12px;"></div>
+    <hr>
+    <button id="goSignupBtn">Go to Signup</button>
+  </div>
+  <script>
+    if (localStorage.getItem('jwt')) {
+      window.location.href = '/';
+    }
+  </script>
+  <script src="/static/js/login.js"></script>
+</body>
+</html>

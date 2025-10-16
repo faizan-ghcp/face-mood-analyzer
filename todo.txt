@@ -1,0 +1,6 @@
+community...
+make signup/login system
+save initial response with user id
+make user menu
+history of results
+music therapy/chatbot

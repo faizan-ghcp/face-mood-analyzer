@@ -5,10 +5,17 @@
   <title>Face Mood Analyzer</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Redirect to login if no JWT
+    if (!localStorage.getItem('jwt')) {
+      window.location.href = '/login';
+    }
+  </script>
 </head>
 <body>
 
   <div class="container">
+    <button id="logoutBtn" style="float:right;">Logout</button>
     <h1>Face Mood Analyzer</h1>
 
     <div id="consentStep" style="margin-bottom:24px;">
@@ -17,9 +24,8 @@
     </div>
 
     <div id="saveStep" style="margin-bottom:18px; display:none;">
-      <label><input type="checkbox" id="saveCheckbox" checked /> Save this scan to history</label>
-      <input id="nameInput" placeholder="Enter your name" />
-      <button id="saveNextBtn" style="margin-left:12px;">Next</button>
+  <label><input type="checkbox" id="saveCheckbox" checked /> Save this scan to history</label>
+  <button id="saveNextBtn" style="margin-left:12px;">Next</button>
     </div>
 
     <div class="palette-bar">
@@ -74,6 +80,10 @@
 
 <script src="/static/js/app.js"></script>
 <script>
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('jwt');
+  window.location.href = '/login';
+};
 // Question card logic
 let questions = [];
 let currentQuestion = 0;
@@ -88,7 +98,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const noConsentBtn = document.getElementById('noConsentBtn');
   const saveNextBtn = document.getElementById('saveNextBtn');
   const saveCheckbox = document.getElementById('saveCheckbox');
-  const nameInput = document.getElementById('nameInput');
 
   // Hide all except consent step at start
   consentStep.style.display = '';
@@ -99,13 +108,6 @@ window.addEventListener('DOMContentLoaded', () => {
     consentStep.style.display = 'none';
     saveStep.style.display = '';
     questionCard.style.display = 'none';
-    nameInput.disabled = !saveCheckbox.checked;
-    saveCheckbox.addEventListener('change', () => {
-      nameInput.disabled = !saveCheckbox.checked;
-      if (!saveCheckbox.checked) {
-        nameInput.value = '';
-      }
-    });
   };
 
   noConsentBtn.onclick = () => {
@@ -116,7 +118,16 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   saveNextBtn.onclick = () => {
-  consentName = saveCheckbox.checked ? nameInput.value : null;
+  // Get username from JWT
+  let jwt = localStorage.getItem('jwt');
+  let username = null;
+  if (jwt) {
+    try {
+      const payload = JSON.parse(atob(jwt.split('.')[1]));
+      username = payload.username;
+    } catch {}
+  }
+  consentName = saveCheckbox.checked ? username : null;
   saveStep.style.display = 'none';
   questionCard.style.display = '';
   loadQuestions();
