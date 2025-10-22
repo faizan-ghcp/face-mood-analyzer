@@ -43,11 +43,13 @@
       <a href="/history">View Mood History</a>
     </div>
 
-    <div id="questionCard" style="margin-bottom:24px; display:block;">
-      <div id="questionText" style="font-size:1.2em; margin-bottom:16px;"></div>
-      <div id="optionButtons"></div>
-      <button id="nextQuestionBtn" style="display:none; margin-top:16px;">Next</button>
-    </div>
+    <!-- Only keep the decorated question card below -->
+      <div id="questionCard" style="margin-bottom:32px; display:block; background: var(--card); border-radius: 18px; box-shadow: 0 4px 24px #4f8cff22; padding: 32px 28px; max-width: 520px; margin-left:auto; margin-right:auto;">
+        <div id="questionProgress" style="margin-bottom:18px; text-align:right; font-size:1em; color:var(--accent); font-weight:500;"></div>
+        <div id="questionText" style="font-size:1.35em; margin-bottom:18px; font-weight:600; color:var(--accent);"></div>
+        <div id="optionButtons" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-bottom:10px;"></div>
+        <button id="nextQuestionBtn" style="display:none; margin-top:22px; background:var(--accent); color:#fff; font-weight:500; border-radius:8px; padding:10px 24px; box-shadow:0 2px 8px #4f8cff22;">Next</button>
+      </div>
 
     <div id="camera" style="display:none;">
       <video id="video" width="480" height="360" autoplay muted></video>
@@ -64,6 +66,12 @@
       <h2>1-Minute Mood Summary</h2>
       <div id="summaryText"></div>
       <canvas id="summaryChart" width="480" height="300"></canvas>
+      <div id="noteSection" style="margin-top:16px;">
+        <label for="noteInput"><b>Add a note (optional):</b></label><br>
+        <textarea id="noteInput" rows="3" style="width:100%;max-width:480px;"></textarea><br>
+        <button id="saveNoteBtn" style="margin-top:8px;">Save Note</button>
+        <span id="noteStatus" style="margin-left:10px;color:green;"></span>
+      </div>
       <button id="closeSummaryBtn">Close Summary</button>
     </div>
 

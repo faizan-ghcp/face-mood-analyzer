@@ -1,3 +1,5 @@
+# Set a single secret key for JWT signing/verification
+SECRET_KEY = "face-mood-2025-super-secret-key"
 # Simple configuration for Face Mood Analyzer
 HOST = "0.0.0.0"
 PORT = 5000

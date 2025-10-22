@@ -39,21 +39,44 @@ function renderTable(data) {
 
 function renderChart(data) {
     const ctx = document.getElementById('moodChart').getContext('2d');
+    if (!data.length) return;
+    // Get all unique moods
+    const moods = Array.from(new Set(data.map(row => row.mood)));
+    // Prepare datasets: one line per mood, y = intensity
+    const datasets = moods.map(mood => ({
+        label: mood,
+        data: data.map(row => row.mood === mood ? row.intensity : null),
+        borderColor: getColorForMood(mood),
+        fill: false,
+        spanGaps: true
+    }));
     const labels = data.map(row => row.date);
-    const moods = data.map(row => row.mood);
     if (window.moodChart) window.moodChart.destroy();
     window.moodChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Mood',
-                data: moods,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: false
-            }]
+            datasets: datasets
+        },
+        options: {
+            plugins: { legend: { display: true } },
+            scales: { y: { beginAtZero: true, max: 100 } }
         }
     });
+}
+
+// Helper: assign a color to each mood
+function getColorForMood(mood) {
+    const colors = {
+        happy: 'rgba(255, 205, 86, 1)',
+        sad: 'rgba(54, 162, 235, 1)',
+        angry: 'rgba(255, 99, 132, 1)',
+        surprise: 'rgba(153, 102, 255, 1)',
+        fear: 'rgba(201, 203, 207, 1)',
+        disgust: 'rgba(75, 192, 192, 1)',
+        neutral: 'rgba(100, 100, 100, 1)'
+    };
+    return colors[mood] || 'rgba(0,0,0,0.5)';
 }
 
 function deleteEntry(id) {

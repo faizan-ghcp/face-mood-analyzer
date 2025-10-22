@@ -169,7 +169,7 @@ function aggregateResults(results) {
 // === MAIN SCAN HANDLER ===
 captureBtn.addEventListener('click', async () => {
   const DURATION = 60;
-  const INTERVAL = 5;
+  const INTERVAL = 1;
   const SAMPLES = Math.floor(DURATION / INTERVAL);
   let results = [];
 
@@ -251,9 +251,47 @@ captureBtn.addEventListener('click', async () => {
   scanSummary.style.display = 'block';
   captureBtn.disabled = false;
 
-  // Auto save if checked
-  if (saveCheckbox && saveCheckbox.checked) {
-    await saveScan(summary, consentName);
+  // Show note section and handle note saving
+  const noteSection = document.getElementById('noteSection');
+  const noteInput = document.getElementById('noteInput');
+  const saveNoteBtn = document.getElementById('saveNoteBtn');
+  const noteStatus = document.getElementById('noteStatus');
+  if (noteSection && noteInput && saveNoteBtn && noteStatus) {
+    noteInput.value = '';
+    noteStatus.textContent = '';
+    noteSection.style.display = '';
+    saveNoteBtn.disabled = false;
+    saveNoteBtn.onclick = async function() {
+      saveNoteBtn.disabled = true;
+      noteStatus.textContent = 'Saving...';
+      const note = noteInput.value.trim();
+      // Save scan with note (only after note is submitted)
+      const payload = {
+        dominant_emotion: summary.mostFrequent,
+        intensity: Math.round(Object.values(summary.avgIntensities || {}).reduce((a,b)=>a+b,0)/(Object.keys(summary.avgIntensities||{}).length||1)),
+        emotions: summary.avgIntensities,
+        name: consentName || null,
+        note: note || null
+      };
+      
+      try {
+        const res = await fetch('/save_result', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          noteStatus.textContent = 'Note saved!';
+        } else {
+          noteStatus.textContent = data.error || 'Save failed';
+        }
+      } catch (err) {
+        noteStatus.textContent = 'Error saving note';
+      }
+      setTimeout(()=>{noteStatus.textContent='';}, 3000);
+      saveNoteBtn.disabled = false;
+    };
   }
 });
 
@@ -294,3 +332,44 @@ if (paletteSelect) {
 }
 
 // Camera will be started after questions are answered
+// (already declared above)
+
+function showQuestion(idx) {
+  const card = document.getElementById('questionCard');
+  const qText = document.getElementById('questionText');
+  const optBtns = document.getElementById('optionButtons');
+  const nextBtn = document.getElementById('nextQuestionBtn');
+  const qProgress = document.getElementById('questionProgress');
+  if (idx >= questions.length) {
+    card.style.display = 'none';
+    document.getElementById('camera').style.display = '';
+    if (window.startCamera) window.startCamera();
+    return;
+  }
+  const q = questions[idx];
+  qProgress.textContent = `Question ${idx+1} of ${questions.length}`;
+  qText.textContent = q.question;
+  optBtns.innerHTML = '';
+  nextBtn.style.display = 'none';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.style.background = q.colors[i] || '#eee';
+    btn.style.color = '#222';
+    btn.style.margin = '6px';
+    btn.style.padding = '10px 18px';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => {
+      answers[idx] = opt;
+      Array.from(optBtns.children).forEach(b => b.disabled = false);
+      btn.disabled = true;
+      // Go to next question after 1 second
+      setTimeout(() => {
+        showQuestion(++currentQuestion);
+      }, 1000);
+    };
+    optBtns.appendChild(btn);
+  });
+}

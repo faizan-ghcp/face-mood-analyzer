@@ -1,19 +1,9 @@
-def get_db_connection():
-    return sqlite3.connect(DB_PATH)
-def delete_entry(entry_id: int) -> bool:
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        cur = conn.cursor()
-        cur.execute("DELETE FROM mood_history WHERE id = ?", (entry_id,))
-        conn.commit()
-        return cur.rowcount > 0
-    finally:
-        conn.close()
+
 import sqlite3
 import json
 import os
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import config
 
 DB_DIR = os.path.join(os.getcwd(), config.DB_DIR)
@@ -26,55 +16,74 @@ CREATE TABLE IF NOT EXISTS mood_history (
     dominant TEXT NOT NULL,
     intensity REAL NOT NULL,
     emotions TEXT NOT NULL,
-    note TEXT
+    note TEXT,
+    username TEXT
 );
 """
 
-def init_db():
+def get_db_connection() -> sqlite3.Connection:
+    """Get a new database connection to the mood_history DB."""
+    return sqlite3.connect(DB_PATH)
+
+def init_db() -> None:
+    """Initialize the mood_history table if it does not exist."""
     os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    try:
+    with sqlite3.connect(DB_PATH) as conn:
         conn.executescript(SCHEMA)
         conn.commit()
-    finally:
-        conn.close()
 
-def save_entry(dominant: str, intensity: float, emotions: Dict[str, float], name: str | None = None) -> int:
+def save_entry(
+    dominant: str,
+    intensity: float,
+    emotions: Dict[str, float],
+    username: Optional[str] = None,
+    note: Optional[str] = None
+) -> int:
+    """Save a mood entry to the database."""
     ts = datetime.utcnow().isoformat() + "Z"
     emotions_json = json.dumps(emotions)
-    conn = sqlite3.connect(DB_PATH)
-    try:
+    with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO mood_history (timestamp, dominant, intensity, emotions, note) VALUES (?, ?, ?, ?, ?)",
-            (ts, dominant, intensity, emotions_json, name)
+            "INSERT INTO mood_history (timestamp, dominant, intensity, emotions, note, username) VALUES (?, ?, ?, ?, ?, ?)",
+            (ts, dominant, intensity, emotions_json, note, username)
         )
         conn.commit()
         return cur.lastrowid
-    finally:
-        conn.close()
 
 def get_history(limit: int = 200) -> List[Dict[str, Any]]:
-    conn = sqlite3.connect(DB_PATH)
-    try:
+    """Retrieve mood history entries, most recent first."""
+    with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
-        cur.execute("SELECT id, timestamp, dominant, intensity, emotions, note as name FROM mood_history ORDER BY id DESC LIMIT ?", (limit,))
+        cur.execute(
+            "SELECT id, timestamp, dominant, intensity, emotions, note, username FROM mood_history ORDER BY id DESC LIMIT ?",
+            (limit,)
+        )
         rows = cur.fetchall()
         result = []
         for r in rows:
-            eid, timestamp, dominant, intensity, emotions_json, name = r
+            eid, timestamp, dominant, intensity, emotions_json, note, username = r
             try:
                 emotions = json.loads(emotions_json)
             except Exception:
                 emotions = {}
+            if username is None:
+                username = "Anonymous"
             result.append({
                 "id": eid,
                 "timestamp": timestamp,
                 "dominant": dominant,
                 "intensity": float(intensity),
                 "emotions": emotions,
-                "name": name
+                "note": note,
+                "username": username
             })
         return result
-    finally:
-        conn.close()
+
+def delete_entry(entry_id: int) -> bool:
+    """Delete a mood entry by its ID. Returns True if deleted."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM mood_history WHERE id = ?", (entry_id,))
+        conn.commit()
+        return cur.rowcount > 0

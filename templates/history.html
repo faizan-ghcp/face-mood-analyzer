@@ -19,7 +19,7 @@
     </div>
 
     <h3>Recent Entries</h3>
-      <div style="margin-bottom:10px;">
+      <div id="adminFilterBar" style="margin-bottom:10px; display:none;">
         <label for="nameFilter">Filter by Name:</label>
         <select id="nameFilter"><option value="">All</option></select>
       </div>
@@ -32,20 +32,51 @@
   </div>
 
   <script>
+
     document.getElementById('logoutBtn').onclick = function() {
       localStorage.removeItem('jwt');
       window.location.href = '/login';
     };
-    async function fetchHistory() {
-      const res = await fetch('/api/history?limit=200');
-      const data = await res.json();
-      return data.history || [];
+
+    // Detect if admin by checking for admin_token cookie
+    function isAdmin() {
+      return document.cookie.split(';').some(c => c.trim().startsWith('admin_token='));
     }
-      function getUniqueNames(entries) {
-        const names = new Set();
-        entries.forEach(e => { if (e.name) names.add(e.name); });
-        return Array.from(names);
+
+
+    async function fetchHistory() {
+      let url = '/api/history?limit=200';
+      let fetchOpts = { credentials: 'include' };
+      if (isAdmin()) {
+        url = '/admin/mood_history';
+      } else {
+        // Attach JWT in Authorization header for user requests
+        const jwt = localStorage.getItem('jwt');
+        if (jwt) {
+          fetchOpts.headers = { 'Authorization': 'Bearer ' + jwt };
+        }
       }
+      try {
+        const res = await fetch(url, fetchOpts);
+        if (!res.ok) {
+          // If unauthorized, return empty array
+          return [];
+        }
+        const data = await res.json();
+        // For admin, /admin/mood_history returns an array; for user, /api/history returns {history: [...]}
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data.history)) return data.history;
+        return [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getUniqueNames(entries) {
+      const names = new Set();
+      entries.forEach(e => { if (e.username) names.add(e.username); });
+      return Array.from(names);
+    }
 
     function populateTable(entries) {
       const tbody = document.querySelector("#historyTable tbody");
@@ -53,7 +84,7 @@
       entries.forEach(e => {
         const tr = document.createElement('tr');
         const ts = new Date(e.timestamp).toLocaleString();
-        tr.innerHTML = `<td>${ts}</td><td>${e.dominant}</td><td>${e.intensity.toFixed(1)}%</td><td>${e.name ? e.name : ''}</td><td><button class='deleteBtn' data-id='${e.id}'>Delete</button></td>`;
+        tr.innerHTML = `<td>${ts}</td><td>${e.dominant}</td><td>${e.intensity.toFixed(1)}%</td><td>${e.username ? e.username : ''}</td><td><button class='deleteBtn' data-id='${e.id}'>Delete</button></td>`;
         tbody.appendChild(tr);
       });
       // Add delete button listeners
@@ -75,32 +106,51 @@
         });
       });
     }
+
       (async () => {
         const entries = await fetchHistory();
-        // Populate name filter dropdown
-        const nameFilter = document.getElementById('nameFilter');
-        const uniqueNames = getUniqueNames(entries);
-        uniqueNames.forEach(name => {
-          const opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          nameFilter.appendChild(opt);
-        });
-
-        function filterAndShow() {
-          const selected = nameFilter.value;
-          let filteredEntries;
-          if (selected === "" || selected === null) {
-            filteredEntries = entries;
-          } else {
-            filteredEntries = entries.filter(e => e.name === selected);
+        const admin = isAdmin();
+        const filterBar = document.getElementById('adminFilterBar');
+        if (admin) {
+          filterBar.style.display = '';
+          // Populate name filter dropdown
+          const nameFilter = document.getElementById('nameFilter');
+          const uniqueNames = getUniqueNames(entries);
+          uniqueNames.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            nameFilter.appendChild(opt);
+          });
+          function filterAndShow() {
+            const selected = nameFilter.value;
+            let filteredEntries;
+            if (selected === "" || selected === null) {
+              filteredEntries = entries;
+            } else {
+              filteredEntries = entries.filter(e => e.username === selected);
+            }
+            populateTable(filteredEntries);
+            drawTimeline(filteredEntries);
           }
-          populateTable(filteredEntries);
-          drawTimeline(filteredEntries);
+          nameFilter.addEventListener('change', filterAndShow);
+          filterAndShow();
+        } else {
+          filterBar.style.display = 'none';
+          // Only show records for the logged-in user
+          // Get username from JWT
+          let jwt = localStorage.getItem('jwt');
+          let username = null;
+          if (jwt) {
+            try {
+              const payload = JSON.parse(atob(jwt.split('.')[1]));
+              username = payload.username;
+            } catch {}
+          }
+          const userEntries = entries.filter(e => e.username === username);
+          populateTable(userEntries);
+          drawTimeline(userEntries);
         }
-        nameFilter.addEventListener('change', filterAndShow);
-        filterAndShow();
-        // drawTimeline(entries);
       })();
 
     let timelineChartObj = null;
