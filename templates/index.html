@@ -15,6 +15,38 @@
 <body>
 
   <div class="container">
+    <div id="badgeSection" style="background:var(--card); border-radius:12px; box-shadow:0 2px 8px #ffd70055; padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; gap:18px;">
+      <span style="font-weight:600; color:#222;">Badges earned:</span>
+      <span id="badgeCount" style="background:gold; color:#222; padding:6px 16px; border-radius:16px; font-weight:600;">0</span>
+    </div>
+    <div id="badgePopup" style="display:none; position:fixed; top:30px; left:50%; transform:translateX(-50%); background:#fffbe6; color:#222; border:2px solid gold; border-radius:16px; box-shadow:0 4px 24px #ffd70055; padding:22px 32px; z-index:9999; font-size:1.2em; font-weight:600;">
+      🎉 You have earned a badge!
+      <button id="closeBadgePopup" style="margin-left:18px; background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 18px; font-size:1em; cursor:pointer;">Close</button>
+    </div>
+    <div id="badgeBar" style="margin-bottom:16px; display:none;">
+      <span id="scanBadge" style="background:gold; color:#222; padding:6px 16px; border-radius:16px; font-weight:600; box-shadow:0 2px 8px #ffd70055;">🏅 Mood Explorer: 5 Scans!</span>
+    </div>
+    <button id="helpBtn" style="float:right; margin-left:12px;">How to use?</button>
+    <div id="helpModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.45); z-index:9999;">
+      <div style="background:#fff; max-width:480px; margin:60px auto; padding:32px 24px; border-radius:16px; box-shadow:0 4px 24px #4f8cff22; position:relative;">
+        <button id="closeHelpBtn" style="position:absolute; top:12px; right:16px; font-size:1.2em; background:none; border:none; color:#4f8cff; cursor:pointer;">&times;</button>
+        <h2 style="margin-top:0;">How to use Face Mood Analyzer</h2>
+        <ol style="margin-bottom:18px;">
+          <li>Answer the short questions to help personalize your scan.</li>
+          <li>Allow camera access and click <b>Scan Mood</b> to start.</li>
+          <li>View your detected mood and suggestions.</li>
+          <li>Optionally save your scan to history (requires login).</li>
+          <li>Check your mood history and trends anytime.</li>
+        </ol>
+        <div style="font-size:0.98em; color:#444; margin-bottom:8px;">
+          <b>Privacy:</b> Your images are processed locally and not stored unless you give consent. You can delete your history anytime.
+        </div>
+        <div style="font-size:0.98em; color:#444;">
+          <b>Need help?</b> Contact support or use the feedback form.
+        </div>
+        <button id="closeHelpBtnBottom" style="margin-top:22px; background:var(--accent); color:#fff; font-weight:500; border-radius:8px; padding:10px 24px; box-shadow:0 2px 8px #4f8cff22; width:100%; font-size:1.1em;">Close</button>
+      </div>
+    </div>
     <button id="logoutBtn" style="float:right;">Logout</button>
     <h1>Face Mood Analyzer</h1>
 
@@ -52,8 +84,9 @@
       </div>
 
     <div id="camera" style="display:none;">
-      <video id="video" width="480" height="360" autoplay muted></video>
-      <button id="captureBtn">Scan Mood</button>
+  <video id="video" width="480" height="360" autoplay muted></video>
+  <div id="speakPrompt" style="margin:18px 0; font-size:1.18em; color:var(--accent); font-weight:500; text-align:center;">Please click on scan mood button and speak about how was your day.</div>
+  <button id="captureBtn">Scan Mood</button>
       <div id="scanProgress" style="display:none; margin-top:10px;">
         <div style="height:18px; background:#eee; border-radius:8px; overflow:hidden;">
           <div id="progressBar" style="height:18px; width:0; background:var(--accent); transition:width 0.3s;"></div>
@@ -73,6 +106,28 @@
         <span id="noteStatus" style="margin-left:10px;color:green;"></span>
       </div>
       <button id="closeSummaryBtn">Close Summary</button>
+      <div id="musicHelp" style="display:none; margin-top:24px; background:#f6faff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; padding:22px 28px; max-width:520px; margin-left:auto; margin-right:auto;">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px; justify-content:center;">
+          <span style="font-size:2.5em; color:#4f8cff; background:#eaf6ff; border-radius:50%; padding:10px; box-shadow:0 2px 8px #4f8cff22;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 24 24"><path d="M9 17V7.5a1 1 0 0 1 .757-.97l7-2A1 1 0 0 1 18 5.5V16a3.5 3.5 0 1 1-2-3.163V8.28l-5 1.429V17a3.5 3.5 0 1 1-2-3.163ZM16.5 19A1.5 1.5 0 1 0 15 17.5a1.5 1.5 0 0 0 1.5 1.5ZM7.5 19A1.5 1.5 0 1 0 6 17.5a1.5 1.5 0 0 0 1.5 1.5Z"></path></svg>
+          </span>
+          <h2 style="color:var(--accent); font-size:1.6em; margin:0;">Music Help</h2>
+        </div>
+        <div id="musicContent">
+          <b>Try these music playlists to boost your mood or relax:</b>
+          <ul>
+            <li><a href="https://www.youtube.com/watch?v=2OEL4P1Rz04" target="_blank">Relaxing Music for Stress Relief</a></li>
+            <li><a href="https://www.youtube.com/watch?v=5qap5aO4i9A" target="_blank">Lo-fi Hip Hop for Focus</a></li>
+            <li><a href="https://www.youtube.com/watch?v=V1Pl8CzNzCw" target="_blank">Uplifting Pop Playlist</a></li>
+            <li><a href="https://www.youtube.com/watch?v=DWcJFNfaw9c" target="_blank">Calm Piano Music</a></li>
+          </ul>
+        </div>
+      </div>
+
+    <div id="wellnessResources" style="display:none; margin-top:24px; background:#f6faff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; padding:22px 28px; max-width:520px; margin-left:auto; margin-right:auto;">
+      <h2 style="color:var(--accent);">Wellness Resources</h2>
+      <div id="wellnessContent"></div>
+    </div>
     </div>
 
     <div id="result" style="display:none;">
@@ -87,6 +142,97 @@
   </div>
 
 <script src="/static/js/app.js"></script>
+<script>
+// Badge logic (per-user)
+document.addEventListener('DOMContentLoaded', function() {
+  // Get username from JWT
+  function getUsername() {
+    let jwt = localStorage.getItem('jwt');
+    if (!jwt) return null;
+    try {
+      const payload = JSON.parse(atob(jwt.split('.')[1]));
+      return payload.username || null;
+    } catch { return null; }
+  }
+  function getBadgeKey() {
+    const username = getUsername();
+    return username ? `badgeCount_${username}` : 'badgeCount_guest';
+  }
+  function getBadgeCount() {
+    let count = 0;
+    try {
+      count = parseInt(localStorage.getItem(getBadgeKey()) || '0');
+    } catch {}
+    return count;
+  }
+  function setBadgeCount(count) {
+    localStorage.setItem(getBadgeKey(), count);
+    var badgeCountElem = document.getElementById('badgeCount');
+    if (badgeCountElem) badgeCountElem.textContent = count;
+  }
+  setBadgeCount(getBadgeCount());
+
+  function showBadgePopup() {
+    var badgePopupElem = document.getElementById('badgePopup');
+    if (badgePopupElem) badgePopupElem.style.display = '';
+  }
+  var closeBadgePopupBtn = document.getElementById('closeBadgePopup');
+  if (closeBadgePopupBtn) {
+    closeBadgePopupBtn.onclick = function() {
+      var badgePopupElem = document.getElementById('badgePopup');
+      if (badgePopupElem) badgePopupElem.style.display = 'none';
+    };
+  }
+
+  // Hook: call this after note is saved
+  window.earnBadgeForNote = function() {
+    let count = getBadgeCount();
+    setBadgeCount(count + 1);
+    showBadgePopup();
+  };
+});
+</script>
+<script>
+// Gamification: Achievement badge for 5 scans
+function updateBadge() {
+  let scans = 0;
+  try {
+    scans = parseInt(localStorage.getItem('scanCount') || '0');
+  } catch {}
+  if (scans >= 1) {
+    document.getElementById('badgeBar').style.display = '';
+  } else {
+    document.getElementById('badgeBar').style.display = 'none';
+  }
+}
+// Increment scan count after each scan (hook into your scan logic)
+window.incrementScanCount = function() {
+  let scans = 0;
+  try {
+    scans = parseInt(localStorage.getItem('scanCount') || '0');
+  } catch {}
+  scans++;
+  localStorage.setItem('scanCount', scans);
+  updateBadge();
+};
+updateBadge();
+</script>
+<script>
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('jwt');
+  window.location.href = '/login';
+};
+// Help modal logic
+document.getElementById('helpBtn').onclick = function() {
+  document.getElementById('helpModal').style.display = '';
+};
+document.getElementById('closeHelpBtn').onclick = function() {
+  document.getElementById('helpModal').style.display = 'none';
+};
+document.getElementById('closeHelpBtnBottom').onclick = function() {
+  document.getElementById('helpModal').style.display = 'none';
+};
+</script>
 <script>
 document.getElementById('logoutBtn').onclick = function() {
   localStorage.removeItem('jwt');

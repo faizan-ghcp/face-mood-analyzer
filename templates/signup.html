@@ -7,6 +7,17 @@
 </head>
 <body>
   <div class="container" style="max-width:400px;margin:auto;">
+    <button id="feedbackBtn" style="float:right; margin-bottom:8px;">Feedback / Report Issue</button>
+    <div id="feedbackModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.45); z-index:9999;">
+      <div style="background:#fff; max-width:380px; margin:60px auto; padding:24px 18px; border-radius:14px; box-shadow:0 4px 24px #4f8cff22; position:relative;">
+        <button id="closeFeedbackBtn" style="position:absolute; top:10px; right:14px; font-size:1.2em; background:none; border:none; color:#4f8cff; cursor:pointer;">&times;</button>
+        <h3 style="margin-top:0;">Send Feedback or Report an Issue</h3>
+        <textarea id="feedbackText" rows="5" style="width:100%; margin-bottom:12px;" placeholder="Describe your issue or suggestion..."></textarea>
+        <button id="submitFeedbackBtn" style="width:100%; background:var(--accent); color:#fff; font-weight:500; border-radius:8px; padding:10px 0;">Submit</button>
+        <div id="feedbackStatus" style="margin-top:10px; color:green;"></div>
+        <button id="closeFeedbackBtnBottom" style="margin-top:18px; background:var(--accent); color:#fff; font-weight:500; border-radius:8px; padding:10px 0; width:100%; font-size:1.05em;">Close</button>
+      </div>
+    </div>
     <h2>Signup</h2>
     <form id="signupForm">
       <input type="text" id="signupUsername" placeholder="Username" required /><br>
@@ -23,5 +34,31 @@
     }
   </script>
   <script src="/static/js/signup.js"></script>
+<script>
+document.getElementById('feedbackBtn').onclick = function() {
+  document.getElementById('feedbackModal').style.display = '';
+};
+document.getElementById('closeFeedbackBtn').onclick = function() {
+  document.getElementById('feedbackModal').style.display = 'none';
+};
+document.getElementById('closeFeedbackBtnBottom').onclick = function() {
+  document.getElementById('feedbackModal').style.display = 'none';
+};
+document.getElementById('submitFeedbackBtn').onclick = async function() {
+  const text = document.getElementById('feedbackText').value.trim();
+  if (!text) {
+    document.getElementById('feedbackStatus').textContent = 'Please enter feedback.';
+    return;
+  }
+  document.getElementById('submitFeedbackBtn').disabled = true;
+  document.getElementById('feedbackStatus').textContent = 'Sending...';
+  // Simulate feedback submission (replace with backend API if needed)
+  setTimeout(() => {
+    document.getElementById('feedbackStatus').textContent = 'Thank you for your feedback!';
+    document.getElementById('submitFeedbackBtn').disabled = false;
+    document.getElementById('feedbackText').value = '';
+  }, 1200);
+};
+</script>
 </body>
 </html>

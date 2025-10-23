@@ -168,7 +168,7 @@ function aggregateResults(results) {
 
 // === MAIN SCAN HANDLER ===
 captureBtn.addEventListener('click', async () => {
-  const DURATION = 60;
+  const DURATION = 10;
   const INTERVAL = 1;
   const SAMPLES = Math.floor(DURATION / INTERVAL);
   let results = [];
@@ -202,7 +202,13 @@ captureBtn.addEventListener('click', async () => {
   let summaryStr = '';
   if (summary.mostFrequent) {
     summaryStr += `<b>Most frequent mood:</b> ${summary.mostFrequent} (${summary.count} of ${SAMPLES})`;
-    summaryStr += `<br><b>What you can do:</b> <span style="color:var(--accent)">${summary.solution}</span>`;
+    // Prominent 'What you can do' section
+    summaryStr += `<div id="whatYouCanDo" style="margin:18px 0; padding:18px 22px; background:#eaf6ff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; font-size:1.25em; font-weight:600; color:var(--accent); text-align:center;">
+      <span style="font-size:1.15em;">What you can do:</span><br>
+      <span style="display:inline-block; margin-top:8px;">${summary.solution}</span>
+    </div>`;
+    // Cache the last suggestion for quick access
+    try { localStorage.setItem('lastSuggestion', summary.solution); } catch {}
     let refLink = '';
     switch ((summary.mostFrequent || '').toLowerCase()) {
       case 'sad':
@@ -235,6 +241,85 @@ captureBtn.addEventListener('click', async () => {
   summaryStr += '<ul>' + Object.entries(summary.avgIntensities).map(([k,v]) => `<li>${k}: ${v}%</li>`).join('') + '</ul>';
   summaryText.innerHTML = summaryStr;
 
+  // Wellness Resources Section
+  const wellnessSection = document.getElementById('wellnessResources');
+  const wellnessContent = document.getElementById('wellnessContent');
+  if (wellnessSection && wellnessContent) {
+    let resourcesHtml = '';
+    switch ((summary.mostFrequent || '').toLowerCase()) {
+      case 'sad':
+        resourcesHtml = `
+          <b>Feeling Sad?</b><br>
+          <ul>
+            <li><a href="https://www.betterhelp.com/advice/depression/" target="_blank">Professional help for sadness</a></li>
+            <li><a href="https://www.mind.org.uk/information-support/types-of-mental-health-problems/depression/" target="_blank">Mind: Depression resources</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/depression" target="_blank">Psychology Today: Understanding Depression</a></li>
+          </ul>`;
+        break;
+      case 'neutral':
+        resourcesHtml = `
+          <b>Feeling Neutral?</b><br>
+          <ul>
+            <li><a href="https://fourwellness.co/blog/31-simple-wellness-tips-for-healthy-and-happy-livings" target="_blank">Wellness tips</a></li>
+            <li><a href="https://www.verywellmind.com/wellness-4157210" target="_blank">Verywell Mind: Wellness</a></li>
+            <li><a href="https://www.actionforhappiness.org/" target="_blank">Action for Happiness</a></li>
+          </ul>`;
+        break;
+      case 'happy':
+        resourcesHtml = `
+          <b>Feeling Happy?</b><br>
+          <ul>
+            <li><a href="https://www.actionforhappiness.org/" target="_blank">Spread happiness</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/happiness" target="_blank">Psychology Today: Happiness</a></li>
+            <li><a href="https://www.ted.com/topics/happiness" target="_blank">TED Talks: Happiness</a></li>
+          </ul>`;
+        break;
+      case 'angry':
+        resourcesHtml = `
+          <b>Feeling Angry?</b><br>
+          <ul>
+            <li><a href="https://www.mind.org.uk/information-support/types-of-mental-health-problems/anger/" target="_blank">Anger management resources</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/anger" target="_blank">Psychology Today: Anger</a></li>
+            <li><a href="https://www.healthline.com/health/mental-health/how-to-control-anger" target="_blank">Healthline: How to Control Anger</a></li>
+          </ul>`;
+        break;
+      case 'fear':
+        resourcesHtml = `
+          <b>Feeling Fearful or Anxious?</b><br>
+          <ul>
+            <li><a href="https://www.anxietycanada.com/" target="_blank">Help for anxiety/fear</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/anxiety" target="_blank">Psychology Today: Anxiety</a></li>
+            <li><a href="https://www.mind.org.uk/information-support/types-of-mental-health-problems/anxiety-and-panic-attacks/" target="_blank">Mind: Anxiety & Panic Attacks</a></li>
+          </ul>`;
+        break;
+      case 'disgust':
+        resourcesHtml = `
+          <b>Feeling Disgust?</b><br>
+          <ul>
+            <li><a href="https://www.paulekman.com/universal-emotions/what-is-disgust/" target="_blank">Understanding Disgust</a></li>
+            <li><a href="https://www.verywellmind.com/what-is-disgust-2795412" target="_blank">Verywell Mind: Disgust</a></li>
+          </ul>`;
+        break;
+      case 'surprise':
+        resourcesHtml = `
+          <b>Feeling Surprised?</b><br>
+          <ul>
+            <li><a href="https://www.paulekman.com/universal-emotions/what-is-surprise/" target="_blank">Learn about Surprise</a></li>
+            <li><a href="https://www.paulekman.com/universal-emotions/what-is-surprise/" target="_blank">Verywell Mind: Surprise</a></li>
+          </ul>`;
+        break;
+      default:
+        resourcesHtml = `
+          <b>General Wellness Resources</b><br>
+          <ul>
+            <li><a href="https://www.mentalhealth.org.uk/explore-mental-health" target="_blank">Mental Health Foundation</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/wellness" target="_blank">Psychology Today: Wellness</a></li>
+          </ul>`;
+    }
+    wellnessContent.innerHTML = resourcesHtml;
+    wellnessSection.style.display = '';
+  }
+
   if (summaryChart) {
     if (summaryChartObj) summaryChartObj.destroy();
     summaryChartObj = new Chart(summaryChart.getContext('2d'), {
@@ -249,6 +334,9 @@ captureBtn.addEventListener('click', async () => {
 
   scanProgress.style.display = 'none';
   scanSummary.style.display = 'block';
+  // Show Music Help section after scan
+  var musicHelp = document.getElementById('musicHelp');
+  if (musicHelp) musicHelp.style.display = '';
   captureBtn.disabled = false;
 
   // Show note section and handle note saving
@@ -283,6 +371,9 @@ captureBtn.addEventListener('click', async () => {
         const data = await res.json();
         if (data.status === 'ok') {
           noteStatus.textContent = 'Note saved!';
+          if (typeof window.earnBadgeForNote === 'function') {
+            window.earnBadgeForNote();
+          }
         } else {
           noteStatus.textContent = data.error || 'Save failed';
         }

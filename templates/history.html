@@ -8,8 +8,15 @@
 </head>
 <body>
   <div class="container">
-    <button id="logoutBtn" style="float:right;">Logout</button>
-    <h1>Mood History</h1>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <h1 style="margin-bottom:0;">Mood History</h1>
+      <button id="logoutBtn" style="margin-left:18px;">Logout</button>
+    </div>
+    <div id="historySummary" style="background:var(--card); border-radius:12px; box-shadow:0 2px 8px #4f8cff22; padding:18px 22px; margin-bottom:18px; display:none;">
+      <h3 style="margin-top:0;">Your Mood Insights</h3>
+      <div id="mostCommonMood" style="margin-bottom:8px;"></div>
+      <div id="happiestDay" style="margin-bottom:8px;"></div>
+    </div>
     <div class="top-links">
       <a href="/">← Back to Scanner</a>
     </div>
@@ -111,6 +118,32 @@
         const entries = await fetchHistory();
         const admin = isAdmin();
         const filterBar = document.getElementById('adminFilterBar');
+        // --- Mood Insights ---
+        function showMoodInsights(entries) {
+          if (!entries.length) {
+            document.getElementById('historySummary').style.display = 'none';
+            return;
+          }
+          // Most common mood
+          const moodCounts = {};
+          entries.forEach(e => {
+            if (e.dominant) moodCounts[e.dominant] = (moodCounts[e.dominant]||0)+1;
+          });
+          let mostMood = null, mostCount = 0;
+          Object.entries(moodCounts).forEach(([m,c]) => { if (c>mostCount) { mostMood=m; mostCount=c; } });
+          // Happiest day (highest intensity for 'happy')
+          let happiest = null, happiestVal = -1;
+          entries.forEach(e => {
+            if (e.dominant==='happy' && e.intensity>happiestVal) {
+              happiestVal = e.intensity;
+              happiest = e;
+            }
+          });
+          document.getElementById('historySummary').style.display = '';
+          document.getElementById('mostCommonMood').textContent = mostMood ? `Most common mood: ${mostMood} (${mostCount} times)` : '';
+          document.getElementById('happiestDay').textContent = happiest ? `Happiest day: ${new Date(happiest.timestamp).toLocaleDateString()} (${happiest.intensity}%)` : '';
+        }
+        // ---
         if (admin) {
           filterBar.style.display = '';
           // Populate name filter dropdown
@@ -132,6 +165,7 @@
             }
             populateTable(filteredEntries);
             drawTimeline(filteredEntries);
+            showMoodInsights(filteredEntries);
           }
           nameFilter.addEventListener('change', filterAndShow);
           filterAndShow();
@@ -150,6 +184,7 @@
           const userEntries = entries.filter(e => e.username === username);
           populateTable(userEntries);
           drawTimeline(userEntries);
+          showMoodInsights(userEntries);
         }
       })();
 
