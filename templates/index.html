@@ -99,13 +99,13 @@
       <h2>1-Minute Mood Summary</h2>
       <div id="summaryText"></div>
       <canvas id="summaryChart" width="480" height="300"></canvas>
-      <div id="noteSection" style="margin-top:16px;">
-        <label for="noteInput"><b>Add a note (optional):</b></label><br>
-        <textarea id="noteInput" rows="3" style="width:100%;max-width:480px;"></textarea><br>
-        <button id="saveNoteBtn" style="margin-top:8px;">Save Note</button>
-        <span id="noteStatus" style="margin-left:10px;color:green;"></span>
-      </div>
       <button id="closeSummaryBtn">Close Summary</button>
+
+      <div id="wellnessResources" style="display:none; margin-top:24px; background:#f6faff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; padding:22px 28px; max-width:520px; margin-left:auto; margin-right:auto;">
+        <h2 style="color:var(--accent);">Wellness Resources</h2>
+        <div id="wellnessContent"></div>
+      </div>
+
       <div id="musicHelp" style="display:none; margin-top:24px; background:#f6faff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; padding:22px 28px; max-width:520px; margin-left:auto; margin-right:auto;">
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:10px; justify-content:center;">
           <span style="font-size:2.5em; color:#4f8cff; background:#eaf6ff; border-radius:50%; padding:10px; box-shadow:0 2px 8px #4f8cff22;">
@@ -123,11 +123,14 @@
           </ul>
         </div>
       </div>
-
-    <div id="wellnessResources" style="display:none; margin-top:24px; background:#f6faff; border-radius:14px; box-shadow:0 2px 8px #4f8cff22; padding:22px 28px; max-width:520px; margin-left:auto; margin-right:auto;">
-      <h2 style="color:var(--accent);">Wellness Resources</h2>
-      <div id="wellnessContent"></div>
     </div>
+
+    <!-- Move noteSection outside scanSummary for independent display -->
+    <div id="noteSection" style="margin-top:16px; display:none;">
+      <label for="noteInput"><b>Add a note (optional):</b></label><br>
+      <textarea id="noteInput" rows="3" style="width:100%;max-width:480px;"></textarea><br>
+      <button id="saveNoteBtn" style="margin-top:8px;">Save Note</button>
+      <span id="noteStatus" style="margin-left:10px;color:green;"></span>
     </div>
 
     <div id="result" style="display:none;">

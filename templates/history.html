@@ -91,8 +91,18 @@
       entries.forEach(e => {
         const tr = document.createElement('tr');
         const ts = new Date(e.timestamp).toLocaleString();
-        tr.innerHTML = `<td>${ts}</td><td>${e.dominant}</td><td>${e.intensity.toFixed(1)}%</td><td>${e.username ? e.username : ''}</td><td><button class='deleteBtn' data-id='${e.id}'>Delete</button></td>`;
+        tr.innerHTML = `<td>${ts}</td><td>${e.dominant}</td><td>${e.intensity.toFixed(1)}%</td><td>${e.username ? e.username : ''}</td><td>
+          <button class='viewTodayBtn' data-date='${new Date(e.timestamp).toISOString().slice(0,10)}' style="margin-right:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;">View Today</button>
+          <button class='deleteBtn' data-id='${e.id}' style="background:#e74c3c;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;">Delete</button>
+        </td>`;
         tbody.appendChild(tr);
+      });
+      // Add view today button listeners
+      tbody.querySelectorAll('.viewTodayBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const date = this.getAttribute('data-date');
+          window.location.href = `/view_moods_by_date?date=${encodeURIComponent(date)}`;
+        });
       });
       // Add delete button listeners
       tbody.querySelectorAll('.deleteBtn').forEach(btn => {

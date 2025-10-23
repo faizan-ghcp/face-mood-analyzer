@@ -339,7 +339,7 @@ captureBtn.addEventListener('click', async () => {
   if (musicHelp) musicHelp.style.display = '';
   captureBtn.disabled = false;
 
-  // Show note section and handle note saving
+  // Show note section and handle note saving BEFORE summary report
   const noteSection = document.getElementById('noteSection');
   const noteInput = document.getElementById('noteInput');
   const saveNoteBtn = document.getElementById('saveNoteBtn');
@@ -348,6 +348,7 @@ captureBtn.addEventListener('click', async () => {
     noteInput.value = '';
     noteStatus.textContent = '';
     noteSection.style.display = '';
+    scanSummary.style.display = 'none';
     saveNoteBtn.disabled = false;
     saveNoteBtn.onclick = async function() {
       saveNoteBtn.disabled = true;
@@ -361,7 +362,6 @@ captureBtn.addEventListener('click', async () => {
         name: consentName || null,
         note: note || null
       };
-      
       try {
         const res = await fetch('/save_result', {
           method: 'POST',
@@ -374,6 +374,9 @@ captureBtn.addEventListener('click', async () => {
           if (typeof window.earnBadgeForNote === 'function') {
             window.earnBadgeForNote();
           }
+          // After saving note, hide note section and show summary report
+          noteSection.style.display = 'none';
+          scanSummary.style.display = 'block';
         } else {
           noteStatus.textContent = data.error || 'Save failed';
         }

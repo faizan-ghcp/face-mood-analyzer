@@ -286,6 +286,8 @@ def api_history():
     except Exception:
         limit = 200
 
+    date_filter = request.args.get("date")
+
     token = None
     if 'Authorization' in request.headers:
         auth_header = request.headers.get('Authorization')
@@ -307,12 +309,21 @@ def api_history():
     data = []
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
-        if is_admin:
-            cur.execute("SELECT id, timestamp, dominant, intensity, emotions, note, username FROM mood_history ORDER BY id DESC LIMIT ?", (limit,))
-        elif username:
-            cur.execute("SELECT id, timestamp, dominant, intensity, emotions, note, username FROM mood_history WHERE username = ? ORDER BY id DESC LIMIT ?", (username, limit))
-        else:
-            return jsonify({"history": []})
+        base_query = "SELECT id, timestamp, dominant, intensity, emotions, note, username FROM mood_history"
+        where_clauses = []
+        params = []
+        if not is_admin and username:
+            where_clauses.append("username = ?")
+            params.append(username)
+        if date_filter:
+            # date_filter is YYYY-MM-DD, timestamp is ISO string
+            where_clauses.append("date(timestamp) = ?")
+            params.append(date_filter)
+        where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+        order_limit_sql = " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+        query = base_query + where_sql + order_limit_sql
+        cur.execute(query, tuple(params))
         rows = cur.fetchall()
 
         for r in rows:
@@ -336,6 +347,11 @@ def api_history():
 @app.route("/history")
 def history_page():
     return render_template("history.html")
+
+
+@app.route('/view_moods_by_date')
+def view_moods_by_date_page():
+    return render_template('view_moods_by_date.html')
 
 
 # ============================================================
