@@ -1,4 +1,4 @@
-# Face Mood Analyzer
+# Emotion Aware AI
 
 A Flask web app that captures a webcam image, performs emotion analysis using DeepFace, returns emotion intensities and suggestions, and stores optional mood-history entries locally (SQLite).
 

@@ -1,3 +1,99 @@
+// === MOTIVATIONAL QUOTE / AFFIRMATION LOGIC ===
+window.addEventListener('DOMContentLoaded', function() {
+  const quotes = [
+    "You are stronger than you think.",
+    "Every day is a fresh start.",
+    "Small steps every day lead to big changes.",
+    "Your feelings are valid.",
+    "Progress, not perfection.",
+    "You have the power to create change.",
+    "Be kind to yourself today.",
+    "You are doing your best, and that's enough.",
+    "Believe in yourself and all that you are.",
+    "It's okay to take a break."
+  ];
+  const box = document.getElementById('motivationBox');
+  const text = document.getElementById('motivationText');
+  if (box && text) {
+    const idx = Math.floor(Math.random() * quotes.length);
+    text.textContent = quotes[idx];
+  }
+});
+
+// === REMINDER BUTTON/MODAL LOGIC ===
+window.addEventListener('DOMContentLoaded', function() {
+  const reminderBtn = document.getElementById('reminderBtn');
+  const reminderModal = document.getElementById('reminderModal');
+  const closeReminderBtn = document.getElementById('closeReminderBtn');
+  const reminderTime = document.getElementById('reminderTime');
+  const setBtn = document.getElementById('setReminderBtn');
+  const clearBtn = document.getElementById('clearReminderBtn');
+  const status = document.getElementById('reminderStatus');
+  // Open modal
+  if (reminderBtn && reminderModal) {
+    reminderBtn.onclick = function() { reminderModal.style.display = ''; };
+  }
+  // Close modal
+  if (closeReminderBtn && reminderModal) {
+    closeReminderBtn.onclick = function() { reminderModal.style.display = 'none'; };
+  }
+  // Load saved time
+  if (reminderTime && status) {
+    const saved = localStorage.getItem('moodReminderTime');
+    if (saved) {
+      reminderTime.value = saved;
+      status.textContent = `Reminder set for ${saved}`;
+      checkAndRequestNotificationPermission();
+      scheduleReminder();
+    }
+  }
+  // Set reminder
+  if (setBtn && reminderTime && status) {
+    setBtn.onclick = function() {
+      const val = reminderTime.value;
+      if (!val) { status.textContent = 'Please select a time.'; return; }
+      localStorage.setItem('moodReminderTime', val);
+      status.textContent = `Reminder set for ${val}`;
+      checkAndRequestNotificationPermission();
+      scheduleReminder();
+    };
+  }
+  // Clear reminder
+  if (clearBtn && status) {
+    clearBtn.onclick = function() {
+      localStorage.removeItem('moodReminderTime');
+      status.textContent = 'Reminder cleared.';
+      if (window.moodReminderTimeout) clearTimeout(window.moodReminderTimeout);
+    };
+  }
+});
+
+function checkAndRequestNotificationPermission() {
+  if (Notification && Notification.permission !== 'granted') {
+    Notification.requestPermission();
+  }
+}
+
+function scheduleReminder() {
+  const time = localStorage.getItem('moodReminderTime');
+  if (!time) return;
+  const [h, m] = time.split(':').map(Number);
+  const now = new Date();
+  let next = new Date();
+  next.setHours(h, m, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const ms = next - now;
+  if (window.moodReminderTimeout) clearTimeout(window.moodReminderTimeout);
+  window.moodReminderTimeout = setTimeout(() => {
+    if (Notification && Notification.permission === 'granted') {
+      new Notification('Mood Reminder', { body: 'Time to log your mood or journal!' });
+    } else {
+      alert('Time to log your mood or journal!');
+    }
+    // Reschedule for next day
+    scheduleReminder();
+  }, ms);
+}
 const video = document.getElementById('video');
 const captureBtn = document.getElementById('captureBtn');
 const rescanBtn = document.getElementById('rescanBtn');

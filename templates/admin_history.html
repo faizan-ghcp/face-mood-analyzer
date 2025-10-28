@@ -3,30 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Mood History</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Admin: Mood History</h2>
-    <button id="logoutBtn" onclick="window.location.href='/logout_admin'">Logout</button>
-        <table id="moodTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Mood</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Mood data will be inserted here -->
-            </tbody>
-        </table>
-        <canvas id="moodChart" width="400" height="200"></canvas>
-    </div>
+        <div class="container">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h1 style="margin-bottom:0;">Admin: Dashboard</h1>
+                <button id="logoutBtn" style="margin-left:18px;" onclick="window.location.href='/logout_admin'">Logout</button>
+            </div>
+            <div id="adminHistorySummary" style="background:var(--card); border-radius:12px; box-shadow:0 2px 8px #4f8cff22; padding:18px 22px; margin-bottom:18px; display:none;">
+                <h3 style="margin-top:0;">Mood Insights (All Users)</h3>
+                <div id="adminMostCommonMood" style="margin-bottom:8px;"></div>
+                <div id="adminHappiestDay" style="margin-bottom:8px;"></div>
+            </div>
+            <div id="adminSummary">
+                <canvas id="moodChart" width="900" height="300"></canvas>
+            </div>
+            <h3>Recent Entries</h3>
+            <table id="moodTable" style="width:100%; border-collapse:collapse; border:2px solid #d0d7de;">
+                <thead>
+                    <tr style="background:var(--card); color:var(--accent); font-weight:600;">
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">Date/Time</th>
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">User</th>
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">Mood</th>
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">Intensity</th>
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">Note</th>
+                        <th style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     <script src="/static/js/admin_history.js"></script>
 </body>
 </html>

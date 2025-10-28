@@ -1,6 +1,6 @@
 # Set a single secret key for JWT signing/verification
 SECRET_KEY = "face-mood-2025-super-secret-key"
-# Simple configuration for Face Mood Analyzer
+# Simple configuration for Emotion Aware AI
 HOST = "0.0.0.0"
 PORT = 5000
 DEBUG = True  # Set False in production

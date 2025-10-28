@@ -19,3 +19,7 @@ document.getElementById('loginForm').onsubmit = async function(e) {
 document.getElementById('goSignupBtn').onclick = function() {
   window.location.href = '/signup';
 };
+
+document.getElementById('goAdminLoginBtn').onclick = function() {
+  window.location.href = '/admin/login';
+};

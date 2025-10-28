@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/admin/mood_history', { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
+            window.allMoodData = data;
+            renderUserFilter(data);
             renderTable(data);
             renderChart(data);
         });
@@ -21,17 +23,35 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
+function renderUserFilter(data) {
+    let users = Array.from(new Set(data.map(row => row.username).filter(Boolean)));
+    const filterBar = document.createElement('div');
+    filterBar.style = 'margin-bottom:10px;';
+    filterBar.innerHTML = `<label for="userFilter">Filter by User:</label> <select id="userFilter"><option value="">All Users</option>${users.map(u=>`<option value="${u}">${u}</option>`).join('')}</select>`;
+    const container = document.querySelector('.container');
+    container.insertBefore(filterBar, document.getElementById('adminSummary'));
+    document.getElementById('userFilter').onchange = function() {
+        const val = this.value;
+        let filtered = val ? window.allMoodData.filter(row => row.username === val) : window.allMoodData;
+        renderTable(filtered);
+        renderChart(filtered);
+    };
+}
+
 function renderTable(data) {
     const tbody = document.querySelector('#moodTable tbody');
     tbody.innerHTML = '';
     data.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${row.id}</td>
-            <td>${row.username}</td>
-            <td>${row.mood}</td>
-            <td>${row.date}</td>
-            <td><button onclick="deleteEntry(${row.id})">Delete</button></td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">${new Date(row.date).toLocaleString()}</td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">${row.username || ''}</td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; font-weight:600; color:var(--accent); text-align:center;">${row.mood}</td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">${row.intensity !== undefined ? row.intensity.toFixed(1) + '%' : ''}</td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; color:#444; text-align:center;">${row.note ? row.note : '<span style=\"color:#bbb;\">—</span>'}</td>
+            <td style="padding:8px 10px; border:1px solid #d0d7de; text-align:center;">
+                <button onclick="deleteEntry(${row.id})" style="background:#e74c3c;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;">Delete</button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -40,24 +60,22 @@ function renderTable(data) {
 function renderChart(data) {
     const ctx = document.getElementById('moodChart').getContext('2d');
     if (!data.length) return;
-    // Get all unique moods
-    const moods = Array.from(new Set(data.map(row => row.mood)));
-    // Prepare datasets: one line per mood, y = intensity
-    const datasets = moods.map(mood => ({
-        label: mood,
-        data: data.map(row => row.mood === mood ? row.intensity : null),
-        borderColor: getColorForMood(mood),
+    // Use up to 50 most recent entries, oldest to newest
+    const recent = data.slice(0, 50).reverse();
+    const labels = recent.map(e => new Date(e.date).toLocaleString());
+    const emotions = Object.keys(recent[0].emotions || {});
+    const datasets = emotions.map(em => ({
+        label: em,
+        data: recent.map(r => r.emotions ? (r.emotions[em] || 0) : 0),
         fill: false,
-        spanGaps: true
+        tension: 0.2,
+        borderColor: getColorForMood(em),
+        backgroundColor: getColorForMood(em)
     }));
-    const labels = data.map(row => row.date);
-    if (window.moodChart) window.moodChart.destroy();
+    if (window.moodChart && typeof window.moodChart.destroy === 'function') window.moodChart.destroy();
     window.moodChart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
+        data: { labels, datasets },
         options: {
             plugins: { legend: { display: true } },
             scales: { y: { beginAtZero: true, max: 100 } }

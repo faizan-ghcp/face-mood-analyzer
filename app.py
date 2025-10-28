@@ -112,7 +112,7 @@ def admin_login():
 @app.route('/admin/dashboard')
 @admin_token_required
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
+    return render_template('admin_history.html')
 
 
 @app.route('/logout_admin')
@@ -123,23 +123,29 @@ def logout_admin():
     return resp
 
 
-@app.route('/admin/history')
-@admin_token_required
-def admin_history():
-    return render_template('admin_history.html')
-
-
 @app.route('/admin/mood_history')
 @admin_token_required
 def admin_mood_history_data():
-    """Return all users' mood history."""
+    """Return all users' mood history, including emotions field."""
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT id, username, dominant, intensity, timestamp, note FROM mood_history ORDER BY id DESC')
-    rows = [
-        {'id': r[0], 'username': r[1], 'mood': r[2], 'intensity': r[3], 'date': r[4], 'note': r[5]}
-        for r in cur.fetchall()
-    ]
+    cur.execute('SELECT id, username, dominant, intensity, timestamp, emotions, note FROM mood_history ORDER BY id DESC')
+    rows = []
+    for r in cur.fetchall():
+        eid, username, dominant, intensity, timestamp, emotions_json, note = r
+        try:
+            emotions = json.loads(emotions_json)
+        except Exception:
+            emotions = {}
+        rows.append({
+            'id': eid,
+            'username': username,
+            'mood': dominant,
+            'intensity': intensity,
+            'date': timestamp,
+            'emotions': emotions,
+            'note': note
+        })
     conn.close()
     return jsonify(rows)
 

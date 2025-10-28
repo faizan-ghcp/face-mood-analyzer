@@ -1,4 +1,4 @@
-# Run this script to create an admin user for Face Mood Analyzer
+# Run this script to create an admin user for Emotion Aware AI
 # Usage: python create_admin.py
 
 from server.admin import create_admin

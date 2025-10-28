@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Mood Scans for Date - Face Mood Analyzer</title>
+  <title>Mood Scans for Date - Emotion Aware AI</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -10,19 +10,33 @@
   <div class="container">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:18px;">
-        <h1 style="margin-bottom:0;">Mood Scans for <span id="dateLabel"></span></h1>
+        <h1 style="margin-bottom:0;">Mood Scans</h1>
         <input type="date" id="datePicker" style="padding:4px 8px;border-radius:6px;border:1px solid #ccc;" />
+        <span id="dateLabel" style="margin-left:10px; font-weight:500; color:var(--accent);"></span>
       </div>
       <a href="/history" style="color:var(--accent);text-decoration:none;font-weight:500;">&larr; Back to History</a>
     </div>
     <div id="moodList">
       <div id="noDataMsg" style="display:none;color:#e74c3c;font-weight:500;margin-bottom:12px;">No data available for this date.</div>
-      <table id="moodsByDateTable" style="width:100%;margin-bottom:24px;">
+      <table id="moodsByDateTable" style="width:100%; margin-bottom:24px; border-collapse:collapse; border:2px solid #4f8cff; box-shadow:0 4px 24px #4f8cff44; background:#fff;">
         <thead>
-          <tr><th>Time</th><th>Dominant</th><th>Intensity</th><th>Note</th></tr>
+          <tr style="background:linear-gradient(90deg,#4f8cff 60%,#a1c4fd 100%); color:#fff; font-weight:700;">
+            <th style="border:1px solid #4f8cff; padding:10px 14px; text-align:center;">Time</th>
+            <th style="border:1px solid #4f8cff; padding:10px 14px; text-align:center;">Dominant</th>
+            <th style="border:1px solid #4f8cff; padding:10px 14px; text-align:center;">Intensity</th>
+            <th style="border:1px solid #4f8cff; padding:10px 14px; text-align:center;">Note</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
+      <style>
+        #moodsByDateTable tbody tr:hover {
+          background: #e6f0ff;
+        }
+        #moodsByDateTable th, #moodsByDateTable td {
+          transition: background 0.2s;
+        }
+      </style>
     </div>
     <div style="margin:24px 0;">
       <canvas id="moodChart" width="900" height="300"></canvas>

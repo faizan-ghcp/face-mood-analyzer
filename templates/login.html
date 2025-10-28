@@ -8,7 +8,6 @@
 <body>
   <div class="container" style="max-width:400px;margin:auto;">
   <h2>Login</h2>
-  <div style="margin-bottom:12px;"><a href="/history">View Mood History</a></div>
     <form id="loginForm">
       <input type="text" id="loginUsername" placeholder="Username" required /><br>
       <input type="password" id="loginPassword" placeholder="Password" required /><br>
@@ -17,6 +16,7 @@
     <div id="authMsg" style="color:red;margin-top:12px;"></div>
     <hr>
     <button id="goSignupBtn">Go to Signup</button>
+    <button id="goAdminLoginBtn">Admin Login</button>
   </div>
   <script>
     if (localStorage.getItem('jwt')) {
